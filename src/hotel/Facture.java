@@ -12,13 +12,14 @@ public class Facture {
     }
 
     public double calculSommeFacture() {
-        // somme du prix de la chambre et du prix des repas
+        // somme du prix de la chambre * nb de nuits
         double sommeChambre = this.client.getReservation()
-                .getChambreReservee().getPrixNuit();
+                .getChambreReservee().getPrixNuit() * this.client.getReservation().getNbNuits();
         double sommeRepas = 0;
+        // et du prix des repas
         for (CommandeRepas commande : this.client.getCommandes()) {
             sommeRepas += commande.getSommeCommande();
         }
-        return 0;
+        return sommeChambre + sommeRepas;
     }
 }

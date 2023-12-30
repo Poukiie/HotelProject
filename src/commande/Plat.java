@@ -1,8 +1,8 @@
 package commande;
 
 public class Plat {
-    private String nomPlat;
-    private double prix;
+    private final String nomPlat;
+    private final double prix;
 
     public Plat(String nomPlat, double prix) {
         this.nomPlat = nomPlat;

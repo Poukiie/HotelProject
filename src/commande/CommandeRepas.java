@@ -7,7 +7,8 @@ public class CommandeRepas {
     private double sommeCommande;
 
     public CommandeRepas() {
-        this.plats = new LinkedList<>();
+        // pas sûr pour le get plats
+        this.plats = getPlats();
         this.sommeCommande = 0;
     }
 

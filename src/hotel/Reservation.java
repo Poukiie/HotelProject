@@ -6,17 +6,17 @@ import java.util.Date;
 
 public class Reservation {
     private int num;
-    private Date dateDebut;
-    private Date dateFin;
-    private Chambre chambreReservee;
+    private final Date dateDebut;
+    private final Date dateFin;
     private int nbNuits;
+    private final Chambre chambreReservee;
 
-    public Reservation(int num, Date dateDebut, Date dateFin, Chambre chambre, Client client) {
-        this.num = num;
+    public Reservation(Date dateDebut, Date dateFin, int nbNuits, Chambre chambre) {
+        this.num++;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
+        this.nbNuits = nbNuits;
         this.chambreReservee = chambre;
-//        this.client = client;
     }
 
     public int getNum() {
@@ -42,6 +42,5 @@ public class Reservation {
     public void setNbNuits(int nbNuits) {
         this.nbNuits = nbNuits;
     }
-
 
 }
