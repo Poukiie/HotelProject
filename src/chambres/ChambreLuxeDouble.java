@@ -5,8 +5,8 @@ public class ChambreLuxeDouble extends Chambre {
     private final boolean equipementHautGamme;
     private final boolean serviceRepas;
 
-    public ChambreLuxeDouble() {
-        super("double", 380.90, 2, false);
+    public ChambreLuxeDouble(int numero) {
+        super(numero, "double", 380.90, 2, false);
         this.baignoireSpa = true;
         this.equipementHautGamme = true;
         this.serviceRepas = true;
@@ -22,5 +22,14 @@ public class ChambreLuxeDouble extends Chambre {
 
     public boolean getServiceRepas() {
         return serviceRepas;
+    }
+
+    public String toString() {
+        return "Chambre " + getNumero() + " (" + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
+                "Etat : " + (getEstAttribuee() ? "attribuée" : "libre") + "\n" +
+                "Nombre de douches : " + getNbDouches() + "\n" +
+                "Baignoire spa : oui\n" +
+                "Equipement haut de gamme\n" +
+                "Service repas : oui\n";
     }
 }

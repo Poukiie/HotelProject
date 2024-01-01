@@ -7,14 +7,12 @@ public class Chambre {
     private int nbDouches;
     private boolean estAttribuee;
 
-    public Chambre(String typeLit, double prixNuit, int nbDouches, boolean estAttribuee) {
-        // auto increment numero
-        this.numero = 1;
+    public Chambre(int numero, String typeLit, double prixNuit, int nbDouches, boolean estAttribuee) {
+        this.numero = numero;
         this.typeLit = typeLit;
         this.prixNuit = prixNuit;
         this.nbDouches = nbDouches;
         this.estAttribuee = estAttribuee;
-        this.numero++;
     }
 
     public int getNumero() {
@@ -33,7 +31,17 @@ public class Chambre {
         return estAttribuee;
     }
 
+    public int getNbDouches() {
+        return nbDouches;
+    }
+
     public void setEstAttribuee(boolean estAttribuee) {
         this.estAttribuee = estAttribuee;
+    }
+
+    public String toString() {
+        return "Chambre " + this.numero + " (" + this.typeLit + ", " + this.prixNuit + "€ par nuit)\n" +
+                "Etat : " + (this.estAttribuee ? "attribuée" : "libre") + "\n" +
+                "Nombre de douches : " + this.nbDouches + "\n";
     }
 }

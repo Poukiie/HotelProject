@@ -4,8 +4,8 @@ public class ChambreNormaleSimple extends Chambre {
     private final boolean balcon;
     private final boolean wifiGratuit;
 
-    public ChambreNormaleSimple() {
-        super("simple", 73.5, 1, false);
+    public ChambreNormaleSimple(int numero) {
+        super(numero, "simple", 73.5, 1, false);
         this.balcon = false;
         this.wifiGratuit = true;
     }
@@ -16,5 +16,13 @@ public class ChambreNormaleSimple extends Chambre {
 
     public boolean getWifiGratuit() {
         return wifiGratuit;
+    }
+
+    public String toString() {
+        return "Chambre " + getNumero() + " (" + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
+                "Etat : " + (getEstAttribuee() ? "attribuée" : "libre") + "\n" +
+                "Nombre de douches : " + getNbDouches() + "\n" +
+                "Accès balcon : oui\n" +
+                "Wi-Fi gratuit: oui\n";
     }
 }

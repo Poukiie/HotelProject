@@ -3,12 +3,11 @@ package commande;
 import java.util.LinkedList;
 
 public class CommandeRepas {
-    private LinkedList<Plat> plats;
+    private final LinkedList<Plat> plats;
     private double sommeCommande;
 
     public CommandeRepas() {
-        // pas sûr pour le get plats
-        this.plats = getPlats();
+        this.plats = new LinkedList<>();
         this.sommeCommande = 0;
     }
 
@@ -23,5 +22,14 @@ public class CommandeRepas {
     public void ajouterPlat(Plat plat) {
         this.plats.add(plat);
         this.sommeCommande += plat.getPrix();
+    }
+
+    public String toString() {
+        StringBuilder commande = new StringBuilder();
+        for (Plat plat : this.plats) {
+            commande.append(plat.toString()).append("\n");
+        }
+        commande.append("Total : ").append(this.sommeCommande).append("€");
+        return commande.toString();
     }
 }

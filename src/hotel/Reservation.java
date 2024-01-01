@@ -2,32 +2,27 @@ package hotel;
 
 import chambres.Chambre;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Reservation {
-    private int num;
-    private final Date dateDebut;
-    private final Date dateFin;
+    private LocalDate dateDebut;
+    private LocalDate dateFin;
     private int nbNuits;
-    private final Chambre chambreReservee;
+    private Chambre chambreReservee;
+    private boolean estAnnulee = false;
 
-    public Reservation(Date dateDebut, Date dateFin, int nbNuits, Chambre chambre) {
-        this.num++;
+    public Reservation(LocalDate dateDebut, LocalDate dateFin, int nbNuits, Chambre chambre) {
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.nbNuits = nbNuits;
         this.chambreReservee = chambre;
     }
 
-    public int getNum() {
-        return num;
-    }
-
-    public Date getDateDebut() {
+    public LocalDate getDateDebut() {
         return dateDebut;
     }
 
-    public Date getDateFin() {
+    public LocalDate getDateFin() {
         return dateFin;
     }
 
@@ -39,8 +34,27 @@ public class Reservation {
         return nbNuits;
     }
 
+    public boolean getEstAnnulee() {
+        return estAnnulee;
+    }
+
     public void setNbNuits(int nbNuits) {
         this.nbNuits = nbNuits;
     }
 
+    public void setDateDebut(LocalDate dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public void setDateFin(LocalDate dateFin) {
+        this.dateFin = dateFin;
+    }
+
+    public void setEstAnnulee(boolean estAnnulee) {
+        this.estAnnulee = estAnnulee;
+    }
+
+    public void setChambreReservee(Chambre chambreReservee) {
+        this.chambreReservee = chambreReservee;
+    }
 }
