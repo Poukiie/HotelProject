@@ -29,7 +29,7 @@ public class ChambreLuxeDouble extends Chambre {
                 "Etat : " + (getEstAttribuee() ? "attribuée" : "libre") + "\n" +
                 "Nombre de douches : " + getNbDouches() + "\n" +
                 "Baignoire spa : oui\n" +
-                "Equipement haut de gamme\n" +
+                "Equipement haut de gamme : oui\n" +
                 "Service repas : oui\n";
     }
 }
