@@ -1,5 +1,7 @@
 import chambres.*;
+import commande.CommandeRepas;
 import hotel.Client;
+import commande.Plat;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -10,24 +12,18 @@ public class HotelApp {
         Scanner scan = new Scanner(System.in);
         LinkedList<Chambre> chambres = createChambres();
         LinkedList<Client> clients = createClients();
+        LinkedList<Plat> plats = createPlats();
 //        File file = new File("donneesHotel.txt");
 
         // TODO : pour plus tard, lire le fichier et créer les chambres dans la méthode createChambres()
         // TODO : pareil pour les clients dans la méthode createClients()
 
-        System.out.println("Bienvenue à l'hôtel Goethe. Que voulez-vous faire ? (tapez le numéro de votre choix)");
-        System.out.println("1. Afficher les chambres");
-        System.out.println("2. Afficher les chambres disponibles");
-        System.out.println("3. Afficher les clients");
-        System.out.println("4. Réserver une chambre");
-        // TODO : rajouter des options pour modifier, annuler et supprimer une réservation
-        System.out.println("5. Commander un repas");
-        System.out.println("6. Afficher les commandes d'un client");
-        System.out.println("7. Enregistrer la facture d'un client");
-        System.out.println("8. Quitter l'application");
+        System.out.println("Bienvenue à l'hôtel Goethe.");
+        afficherMenu();
         String choice = "";
 
-        while (!choice.equals("8")) {
+        while (!choice.equals("9")) {
+            System.out.print("> ");
             choice = scan.nextLine();
             switch (choice) {
                 case "1":
@@ -46,13 +42,14 @@ public class HotelApp {
                     break;
                 case "3":
                     System.out.println("Liste des clients :");
-                    afficherClients(clients);
+                    for (Client client : clients) {
+                        System.out.println(client);
+                    }
                     break;
                 case "4":
                     System.out.println("Sélectionnez le client qui souhaite réserver :");
                     afficherClients(clients);
                     String clientChoisi = scan.nextLine();
-                    // TODO : vérifier que le client n'a pas déjà une réservation
                     System.out.println("Quelle chambre souhaitez-vous réserver ?");
                     afficherChambres(chambres);
                     String chambreChoisie = scan.nextLine();
@@ -62,31 +59,62 @@ public class HotelApp {
 
                     break;
                 case "5":
+                case "6":
                     System.out.println("Sélectionnez le client qui souhaite commander un repas :");
                     afficherClients(clients);
                     clientChoisi = scan.nextLine();
-                    // TODO : demander le nom du plat et la quantité
-                    // TODO : créer la commande
-                    break;
-                case "6":
-                    System.out.println("Choisissez le client dont vous voulez afficher les commandes :");
-                    afficherClients(clients);
-                    clientChoisi = scan.nextLine();
-                    // TODO : afficher les commandes du client
+                    Client clientChoisiRepas = trouverClientParNom(clients, clientChoisi);
+                    Plat platChoisi = null;
+                    if (clientChoisiRepas != null) {
+                        System.out.println("Liste des plats disponibles :");
+                        afficherPlatsDisponibles(plats);
+
+                        System.out.println("Quel plat souhaitez-vous commander ?");
+                        String nomPlat = scan.nextLine().trim(); //trim ici pour enlever les espaces et éviter confusion
+                        platChoisi = trouverPlatParNom(plats, nomPlat);
+                    }
+                    // demander le nom du plat et la quantité
+                    if (platChoisi != null) {
+                        System.out.println("Quantité : ");
+                        int quantitePlat = scan.nextInt();
+                        // créer la commande
+                        clientChoisiRepas.commanderRepas(platChoisi, quantitePlat);
+                    } else {
+                        System.out.println("Plat introuvable.");
+                    }
                     break;
                 case "7":
+                    System.out.println("Choisissez le client dont vous voulez afficher les commandes :");
+                    afficherClients(clients);
+                    String clientChoisiPourCommandes = scan.nextLine();
+                    Client clientCommandes = trouverClientParNom(clients, clientChoisiPourCommandes);
+                    if (clientCommandes != null) {
+                        LinkedList<CommandeRepas> commandes = clientCommandes.getCommandes();
+                        if (!commandes.isEmpty()) {
+                            System.out.println("Commandes passées pour le client " + clientCommandes.getNom() + " :");
+                            for (CommandeRepas commande : commandes) {
+                                System.out.println(commande);
+                            }
+                        } else {
+                            System.out.println("Le client n'a aucune commande passée.");
+                        }
+                    }
+                    break;
+                case "8":
                     System.out.println("Pour quel client souhaitez-vous enregistrer la facture ?");
                     afficherClients(clients);
                     clientChoisi = scan.nextLine();
                     // TODO : enregistrer la facture du client
                     break;
-                case "8":
+                case "9":
                     System.out.println("Au revoir !");
-                    break;
+                    // TODO: Sauvegarder les données
+                    return;
                 default:
                     System.out.println("Commande inconnue, veuillez réessayer.");
                     break;
             }
+            afficherMenu();
         }
     }
 
@@ -126,15 +154,63 @@ public class HotelApp {
         return clients;
     }
 
+    private static LinkedList<Plat> createPlats() {
+        LinkedList<Plat> plats = new LinkedList<>();
+        Plat plat1 = new Plat("Pizza", 12.5);
+        Plat plat2 = new Plat("Burger", 10.5);
+        Plat plat3 = new Plat("Salade", 6.5);
+        plats.add(plat1);
+        plats.add(plat2);
+        plats.add(plat3);
+        return plats;
+    }
+
+    private static Client trouverClientParNom(LinkedList<Client> clients, String nomClient) {
+        for (Client client : clients) {
+            if (client.getNom().equalsIgnoreCase(nomClient)) {
+                return client;
+            }
+        }
+        return null;
+    }
+
+    private static Plat trouverPlatParNom(LinkedList<Plat> plats, String nomPlat) {
+        for (Plat plat : plats) {
+            if (plat.getNomPlat().equalsIgnoreCase(nomPlat)) {
+                return plat;
+            }
+        }
+        return null;
+    }
+
     private static void afficherClients(LinkedList<Client> clients) {
         for (Client client : clients) {
-            System.out.println(client.toString());
+            System.out.println(client.getNom());
         }
     }
 
     private static void afficherChambres(LinkedList<Chambre> chambres) {
         for (Chambre chambre : chambres) {
-            System.out.println(chambre.toString());
+            System.out.println(chambre);
         }
+    }
+
+    private static void afficherPlatsDisponibles(LinkedList<Plat> plats) {
+        for (Plat plat : plats) {
+            System.out.println(plat);
+        }
+    }
+
+    private static void afficherMenu() {
+        System.out.println("Que voulez-vous faire ? (tapez le numéro de votre choix");
+        System.out.println("1. Afficher les chambres");
+        System.out.println("2. Afficher les chambres disponibles");
+        System.out.println("3. Afficher les clients");
+        System.out.println("4. Réserver une chambre");
+        System.out.println("5. Gérer une réservation"); // modifier, annuler et supprimer une réservation
+        System.out.println("6. Commander un repas");
+        System.out.println("7. Afficher les commandes d'un client");
+        System.out.println("8. Enregistrer la facture d'un client");
+        System.out.println("9. Quitter l'application");
     }
 }

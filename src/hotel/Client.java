@@ -2,7 +2,8 @@ package hotel;
 
 import chambres.Chambre;
 import commande.CommandeRepas;
-import exception.ClientAlreadyHasReservationException;
+import commande.Plat;
+import exception.ChambreDejaReserveeException;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
@@ -31,18 +32,13 @@ public class Client {
     }
 
     public void reserver(Chambre chambre, int nbNuits, LocalDate dateDebut, LocalDate dateFin)
-            throws ClientAlreadyHasReservationException {
-        // TODO: peut-être à faire autre part pour vérifier qu'un client a déjà une réservation
-        if (this.reservation == null) {
+            throws ChambreDejaReserveeException {
+        if (!chambre.getEstAttribuee()) {
             this.reservation = new Reservation(dateDebut, dateFin, nbNuits, chambre);
             chambre.setEstAttribuee(true);
         }
         else {
-            throw new ClientAlreadyHasReservationException("Le client a déjà une réservation");
-        }
-        if (chambre.getEstAttribuee()) {
-            System.out.println("La chambre est déjà attribuée");
-            // TODO : gérer le cas où la chambre est déjà attribuée
+            throw new ChambreDejaReserveeException("La chambre est déjà réservée.");
         }
     }
 
@@ -62,23 +58,30 @@ public class Client {
 
     // Supprimer une reservation :
     // Supprimer l'objet Réservation, et cette réservation supprimée n'apparaitra pas dans le fichier
-    public void annulerSupprimerReservation() {
+    public void annulerReservation() {
         this.reservation.setEstAnnulee(true);
         this.reservation.getChambreReservee().setEstAttribuee(false);
-        this.reservation = null;
     }
 
     public void supprimerReservation() {
         this.reservation = null;
     }
 
-    public void commander(CommandeRepas commande) {
-        this.commandes.add(commande);
+    public void commanderRepas(Plat plat, int quantite) {
+        CommandeRepas commandeRepas = new CommandeRepas();
+
+        for (int i = 0; i < quantite; i++) {
+            commandeRepas.ajouterPlat(plat);
+        }
+
+        this.commandes.add(commandeRepas);
+
+        System.out.println("Commande de repas passée avec succès pour le client " + this.nom);
     }
 
     public String toString() {
-        return "Client " + this.nom + "\n" +
-                "Réservation : " + this.reservation + "\n" +
+        return "Nom : " + this.nom + "\n" +
+                "Réservation : " + (this.reservation != null ? this.reservation : "Aucune réservation") + "\n" +
                 "Commandes : " + this.commandes + "\n";
     }
 }

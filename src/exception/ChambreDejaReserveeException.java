@@ -1,10 +1,10 @@
 package exception;
 
-public class ClientAlreadyHasReservationException extends Exception {
-    public ClientAlreadyHasReservationException(String message) {
+public class ChambreDejaReserveeException extends Exception {
+    public ChambreDejaReserveeException(String message) {
         super(message);
     }
 
-    public ClientAlreadyHasReservationException() {
+    public ChambreDejaReserveeException() {
     }
 }
