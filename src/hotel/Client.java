@@ -40,7 +40,7 @@ public class Client {
         if (verifierDisponibilite(chambre, dateDebut, dateFin)) {
             // ex: du 15 au 17 = 3 nuits (cette fonction exclus la date de fin)
             int nbNuits = this.reservation.calculerNbNuits(dateDebut, dateFin);
-            this.reservation = new Reservation(dateDebut, dateFin, chambre);
+            this.reservation = new Reservation(dateDebut, dateFin, nbNuits, chambre);
             chambre.setEstAttribuee(true);
 
             // rendre la chambre occupée pour les dates choisies

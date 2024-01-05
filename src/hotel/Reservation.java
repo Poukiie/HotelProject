@@ -11,10 +11,10 @@ public class Reservation {
     private Chambre chambreReservee;
     private boolean estAnnulee = false;
 
-    public Reservation(LocalDate dateDebut, LocalDate dateFin, Chambre chambre) {
+    public Reservation(LocalDate dateDebut, LocalDate dateFin, int nbNuits, Chambre chambre) {
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
-        this.nbNuits = calculerNbNuits(dateDebut, dateFin);
+        this.nbNuits = nbNuits;
         this.chambreReservee = chambre;
     }
 

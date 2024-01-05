@@ -275,9 +275,12 @@ public class HotelApp implements Serializable {
     private static LocalDate parseDate(LocalDate date, String dateToParse, Scanner scan) {
         try {
             date = LocalDate.parse(dateToParse, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            // TODO : Quand on retape la date, c'est nullpointerexception
         } catch (DateTimeParseException e) {
             System.out.println("Format de date invalide. Veuillez réessayer.");
+            System.out.println("> ");
             dateToParse = scan.nextLine();
+            date = parseDate(date, dateToParse, scan);
         }
         return date;
     }
