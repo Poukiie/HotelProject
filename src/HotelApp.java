@@ -1,22 +1,26 @@
 import chambres.*;
 import commande.CommandeRepas;
+import exception.ChambreNonDisponible;
 import hotel.Client;
 import commande.Plat;
+import hotel.Facture;
 
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.Scanner;
 
-public class HotelApp {
+
+public class HotelApp implements Serializable {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         LinkedList<Chambre> chambres = createChambres();
         LinkedList<Client> clients = createClients();
         LinkedList<Plat> plats = createPlats();
-//        File file = new File("donneesHotel.txt");
-
-        // TODO : pour plus tard, lire le fichier et créer les chambres dans la méthode createChambres()
-        // TODO : pareil pour les clients dans la méthode createClients()
+        File file = new File("donneesHotel.ser");
 
         System.out.println("Bienvenue à l'hôtel Goethe.");
         afficherMenu();
@@ -26,85 +30,170 @@ public class HotelApp {
             System.out.print("> ");
             choice = scan.nextLine();
             switch (choice) {
+                // Afficher les chambres
                 case "1":
                     System.out.println("Liste des chambres :");
                     for (Chambre chambre : chambres) {
-                        System.out.println(chambre.toString());
+                        System.out.println(chambre);
                     }
                     break;
+                // Afficher les chambres disponibles
                 case "2":
                     System.out.println("Liste des chambres disponibles :");
                     for (Chambre chambre : chambres) {
                         if (!chambre.getEstAttribuee()) {
-                            System.out.println(chambre.toString());
+                            System.out.println(chambre);
                         }
                     }
                     break;
+                // Afficher les clients
                 case "3":
                     System.out.println("Liste des clients :");
                     for (Client client : clients) {
                         System.out.println(client);
                     }
                     break;
+                // Réserver une chambre
                 case "4":
                     System.out.println("Sélectionnez le client qui souhaite réserver :");
-                    afficherClients(clients);
-                    String clientChoisi = scan.nextLine();
-                    System.out.println("Quelle chambre souhaitez-vous réserver ?");
-                    afficherChambres(chambres);
-                    String chambreChoisie = scan.nextLine();
-                    // TODO: demander les dates de début et de fin de la réservation
-                    // TODO : vérifier que la chambre est disponible
-                    // TODO : créer la réservation
+                    Client clientChoisi = choisirClient(clients, scan);
 
+                    while (clientChoisi == null || clientChoisi.getReservation() != null) {
+                        System.out.println("Client introuvable ou réservation déjà existante. Veuillez réessayer.");
+                        clientChoisi = choisirClient(clients, scan);
+                    }
+
+                    Chambre chambreReservee = verifierChambreReservation(clientChoisi, chambres, scan);
+                    creerReservation(clientChoisi, chambreReservee, scan);
                     break;
+                // Gérer une réservation
                 case "5":
+                    System.out.println("Gérer une réservation pour quel client ?");
+                    clientChoisi = choisirClient(clients, scan);
+
+                    if (clientChoisi != null && clientChoisi.getReservation() != null) {
+                        System.out.println("Réservation actuelle du client :");
+                        System.out.println(clientChoisi.getReservation());
+
+                        System.out.println("Que voulez-vous faire ?");
+                        System.out.println("1. Modifier la réservation");
+                        System.out.println("2. Annuler la réservation");
+                        System.out.println("3. Supprimer la réservation");
+                        String choixGestion = scan.nextLine();
+
+                        switch (choixGestion) {
+                            case "1":
+//                                if (clientChoisi.getReservation() != null) {
+//                                    Chambre chambreModification = reservationModification.getChambreReservee();
+                                LocalDate dateDebutModification = null;
+                                LocalDate dateFinModification = null;
+
+                                System.out.println("Réservation actuelle :");
+                                System.out.println(clientChoisi.getReservation());
+
+                                System.out.println("Entrez la nouvelle chambre :");
+                                afficherChambres(chambres);
+                                Chambre nouvelleChambre = choisirChambre(chambres, scan);
+                                while (nouvelleChambre == null) {
+                                    System.out.println("Chambre introuvable. Veuillez réessayer.");
+                                    nouvelleChambre = choisirChambre(chambres, scan);
+                                }
+
+                                System.out.println("Entrez la nouvelle date de début de la réservation (format jj/MM/yyyy) :");
+                                String nouvelleDebut = scan.nextLine();
+                                dateDebutModification = parseDate(dateDebutModification, nouvelleDebut, scan);
+
+                                System.out.println("Entrez la nouvelle date de fin de la réservation (format jj/MM/yyyy) :");
+                                String nouvelleFin = scan.nextLine();
+                                dateFinModification = parseDate(dateFinModification, nouvelleFin, scan);
+                                while (dateDebutModification.isAfter(dateFinModification)) {
+                                    System.out.println("La date de début doit être avant la date de fin. Veuillez réessayer.");
+                                    System.out.print("> ");
+                                    nouvelleFin = scan.nextLine();
+                                    dateFinModification = parseDate(dateFinModification, nouvelleFin, scan);
+                                }
+
+                                try {
+                                    clientChoisi.modifierReservation(dateDebutModification, dateFinModification, nouvelleChambre);
+                                } catch (ChambreNonDisponible e) {
+                                    System.out.println(e.getMessage());
+                                }
+//                                } else {
+//                                    System.out.println("Ce client n'a pas de réservation à modifier.");
+//                                }
+                                break;
+                            case "2": // annuler : état annulé + trace dans le fichier avant de la supprimer
+                                clientChoisi.annulerReservation();
+                                // TODO : Ecrire la réservation dans le fichier (infos + annulée)
+                                try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(file.toPath()))) {
+                                    oos.writeObject(clientChoisi.getReservation());
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                clientChoisi.supprimerReservation();
+                                System.out.println("Réservation annulée avec succès.");
+                                break;
+                            case "3": // supprimer : cette réservation n'apparait pas dans le fichier
+                                clientChoisi.supprimerReservation();
+                                System.out.println("Réservation supprimée avec succès.");
+                                break;
+                        }
+                    } else {
+                        System.out.println("Client introuvable ou aucune réservation existante.");
+                    }
+                    break;
+                // Commander un repas
                 case "6":
                     System.out.println("Sélectionnez le client qui souhaite commander un repas :");
-                    afficherClients(clients);
-                    clientChoisi = scan.nextLine();
-                    Client clientChoisiRepas = trouverClientParNom(clients, clientChoisi);
+                    clientChoisi = choisirClient(clients, scan);
                     Plat platChoisi = null;
-                    if (clientChoisiRepas != null) {
-                        System.out.println("Liste des plats disponibles :");
-                        afficherPlatsDisponibles(plats);
+                    while (clientChoisi == null) {
+                        System.out.println("Client introuvable. Veuillez réessayer.");
+                        clientChoisi = choisirClient(clients, scan);
+                    }
+                    System.out.println("Liste des plats disponibles :");
+                    afficherPlatsDisponibles(plats);
+                    System.out.println("Quel plat souhaitez-vous commander ?");
+                    platChoisi = choisirPlat(plats, scan);
 
-                        System.out.println("Quel plat souhaitez-vous commander ?");
-                        String nomPlat = scan.nextLine().trim(); //trim ici pour enlever les espaces et éviter confusion
-                        platChoisi = trouverPlatParNom(plats, nomPlat);
+                    while (platChoisi == null) {
+                        System.out.println("Plat introuvable. Veuillez réessayer.");
+                        platChoisi = choisirPlat(plats, scan);
                     }
-                    // demander le nom du plat et la quantité
-                    if (platChoisi != null) {
-                        System.out.println("Quantité : ");
-                        int quantitePlat = scan.nextInt();
-                        // créer la commande
-                        clientChoisiRepas.commanderRepas(platChoisi, quantitePlat);
-                    } else {
-                        System.out.println("Plat introuvable.");
-                    }
+                    System.out.println("Quantité : ");
+                    System.out.println("> ");
+                    int quantitePlat = scan.nextInt();
+                    clientChoisi.commanderRepas(platChoisi, quantitePlat);
                     break;
+                // Afficher les commandes d'un client
                 case "7":
                     System.out.println("Choisissez le client dont vous voulez afficher les commandes :");
-                    afficherClients(clients);
-                    String clientChoisiPourCommandes = scan.nextLine();
-                    Client clientCommandes = trouverClientParNom(clients, clientChoisiPourCommandes);
-                    if (clientCommandes != null) {
-                        LinkedList<CommandeRepas> commandes = clientCommandes.getCommandes();
-                        if (!commandes.isEmpty()) {
-                            System.out.println("Commandes passées pour le client " + clientCommandes.getNom() + " :");
-                            for (CommandeRepas commande : commandes) {
-                                System.out.println(commande);
-                            }
-                        } else {
-                            System.out.println("Le client n'a aucune commande passée.");
+                    clientChoisi = choisirClient(clients, scan);
+                    while (clientChoisi == null) {
+                        System.out.println("Client introuvable. Veuillez réessayer.");
+                        clientChoisi = choisirClient(clients, scan);
+                    }
+                    LinkedList<CommandeRepas> commandes = clientChoisi.getCommandes();
+                    if (!commandes.isEmpty()) {
+                        System.out.println("Commandes passées pour le client " + clientChoisi.getNom() + " :");
+                        for (CommandeRepas commande : commandes) {
+                            System.out.println(commande);
                         }
+                    } else {
+                        System.out.println("Le client n'a aucune commande passée.");
                     }
                     break;
+                // Enregistrer la facture d'un client
                 case "8":
                     System.out.println("Pour quel client souhaitez-vous enregistrer la facture ?");
-                    afficherClients(clients);
-                    clientChoisi = scan.nextLine();
-                    // TODO : enregistrer la facture du client
+                    clientChoisi = choisirClient(clients, scan);
+                    while (clientChoisi == null) {
+                        System.out.println("Client introuvable. Veuillez réessayer.");
+                        clientChoisi = choisirClient(clients, scan);
+                    }
+                    Facture facture = new Facture(clientChoisi);
+                    System.out.println(facture);
+                    clientChoisi.payerFacture(); // il part
                     break;
                 case "9":
                     System.out.println("Au revoir !");
@@ -183,6 +272,54 @@ public class HotelApp {
         return null;
     }
 
+    private static LocalDate parseDate(LocalDate date, String dateToParse, Scanner scan) {
+        try {
+            date = LocalDate.parse(dateToParse, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } catch (DateTimeParseException e) {
+            System.out.println("Format de date invalide. Veuillez réessayer.");
+            dateToParse = scan.nextLine();
+        }
+        return date;
+    }
+
+    private static Chambre verifierChambreReservation(Client clientChoisi, LinkedList<Chambre> chambres, Scanner scan) {
+        System.out.println("Quelle chambre souhaitez-vous réserver ?");
+        afficherChambres(chambres);
+        Chambre chambreReservee = choisirChambre(chambres, scan);
+
+        while (chambreReservee == null) {
+            System.out.println("Chambre introuvable. Veuillez réessayer.");
+            chambreReservee = choisirChambre(chambres, scan);
+        }
+        return chambreReservee;
+    }
+
+    private static void creerReservation(Client clientChoisi, Chambre chambreReservee, Scanner scan) {
+        LocalDate dateDebut = null;
+        LocalDate dateFin = null;
+        System.out.println("Entrez la date de début de la réservation (format jj/MM/yyyy) :");
+        System.out.print("> ");
+        String debut = scan.nextLine();
+        dateDebut = parseDate(dateDebut, debut, scan); // essayer de parser la date pour voir si c'est correct
+
+        System.out.println("Entrez la date de fin de la réservation (format jj/MM/yyyy) :");
+        System.out.print("> ");
+        String fin = scan.nextLine();
+        dateFin = parseDate(dateFin, fin, scan);
+        while (dateDebut.isAfter(dateFin)) {
+            System.out.println("La date de début doit être avant la date de fin. Veuillez réessayer.");
+            System.out.print("> ");
+            fin = scan.nextLine();
+            dateFin = parseDate(dateFin, fin, scan);
+        }
+
+        try {
+            clientChoisi.reserver(chambreReservee, dateDebut, dateFin);
+        } catch (ChambreNonDisponible e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     private static void afficherClients(LinkedList<Client> clients) {
         for (Client client : clients) {
             System.out.println(client.getNom());
@@ -201,8 +338,36 @@ public class HotelApp {
         }
     }
 
+    private static Client choisirClient(LinkedList<Client> clients, Scanner scan) {
+        afficherClients(clients);
+        System.out.print("> ");
+        String clientChoisiNom = scan.nextLine();
+        return trouverClientParNom(clients, clientChoisiNom);
+    }
+
+    private static Chambre choisirChambre(LinkedList<Chambre> chambres, Scanner scan) {
+        System.out.print("> ");
+        String chambreChoisie = scan.nextLine();
+        return trouverChambreParNumero(chambres, chambreChoisie);
+    }
+
+    private static Plat choisirPlat(LinkedList<Plat> plats, Scanner scan) {
+        System.out.print("> ");
+        String platChoisi = scan.nextLine();
+        return trouverPlatParNom(plats, platChoisi);
+    }
+
+    private static Chambre trouverChambreParNumero(LinkedList<Chambre> chambres, String numeroChambre) {
+        for (Chambre chambre : chambres) {
+            if (String.valueOf(chambre.getNumero()).equals(numeroChambre)) {
+                return chambre;
+            }
+        }
+        return null;
+    }
+
     private static void afficherMenu() {
-        System.out.println("Que voulez-vous faire ? (tapez le numéro de votre choix");
+        System.out.println("Que voulez-vous faire ? (tapez le numéro de votre choix)");
         System.out.println("1. Afficher les chambres");
         System.out.println("2. Afficher les chambres disponibles");
         System.out.println("3. Afficher les clients");
@@ -213,4 +378,5 @@ public class HotelApp {
         System.out.println("8. Enregistrer la facture d'un client");
         System.out.println("9. Quitter l'application");
     }
+
 }

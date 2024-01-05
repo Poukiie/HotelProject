@@ -1,8 +1,8 @@
 package hotel;
 
 import chambres.Chambre;
-
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 public class Reservation {
     private LocalDate dateDebut;
@@ -11,11 +11,15 @@ public class Reservation {
     private Chambre chambreReservee;
     private boolean estAnnulee = false;
 
-    public Reservation(LocalDate dateDebut, LocalDate dateFin, int nbNuits, Chambre chambre) {
+    public Reservation(LocalDate dateDebut, LocalDate dateFin, Chambre chambre) {
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
-        this.nbNuits = nbNuits;
+        this.nbNuits = calculerNbNuits(dateDebut, dateFin);
         this.chambreReservee = chambre;
+    }
+
+    public String toString() {
+        return "Réservation du " + dateDebut + " au " + dateFin + " pour la chambre " + chambreReservee.getNumero();
     }
 
     public LocalDate getDateDebut() {
@@ -34,14 +38,6 @@ public class Reservation {
         return nbNuits;
     }
 
-    public boolean getEstAnnulee() {
-        return estAnnulee;
-    }
-
-    public void setNbNuits(int nbNuits) {
-        this.nbNuits = nbNuits;
-    }
-
     public void setDateDebut(LocalDate dateDebut) {
         this.dateDebut = dateDebut;
     }
@@ -56,5 +52,9 @@ public class Reservation {
 
     public void setChambreReservee(Chambre chambreReservee) {
         this.chambreReservee = chambreReservee;
+    }
+
+    public int calculerNbNuits(LocalDate dateDebut, LocalDate dateFin) {
+        return(int) ChronoUnit.DAYS.between(dateDebut, dateFin) + 1;
     }
 }
