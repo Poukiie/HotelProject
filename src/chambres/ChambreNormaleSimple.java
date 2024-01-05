@@ -19,7 +19,7 @@ public class ChambreNormaleSimple extends Chambre {
     }
 
     public String toString() {
-        return "Chambre " + getNumero() + " (lit" + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
+        return "Chambre " + getNumero() + " (lit " + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
                 "Etat : " + (getEstAttribuee() ? "attribuée" : "libre") + "\n" +
                 "Nombre de douches : " + getNbDouches() + "\n" +
                 "Accès balcon : oui\n" +

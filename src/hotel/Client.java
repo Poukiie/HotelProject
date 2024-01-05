@@ -6,6 +6,7 @@ import commande.Plat;
 import exception.ChambreNonDisponible;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 
 public class Client {
@@ -39,7 +40,7 @@ public class Client {
             throws ChambreNonDisponible {
         if (verifierDisponibilite(chambre, dateDebut, dateFin)) {
             // ex: du 15 au 17 = 3 nuits (cette fonction exclus la date de fin)
-            int nbNuits = this.reservation.calculerNbNuits(dateDebut, dateFin);
+            int nbNuits = (int) ChronoUnit.DAYS.between(dateDebut, dateFin) + 1;
             this.reservation = new Reservation(dateDebut, dateFin, nbNuits, chambre);
             chambre.setEstAttribuee(true);
 
@@ -69,35 +70,38 @@ public class Client {
             return false;
         }
     }
-
-    // modifier une réservation
     public void modifierReservation(LocalDate nouvelleDateDebut, LocalDate nouvelleDateFin, Chambre nouvelleChambre)
             throws ChambreNonDisponible {
-        // si la chambre est différente de la chambre actuelle
-        if (nouvelleChambre.getNumero() != this.reservation.getChambreReservee().getNumero()) {
-            Chambre ancienneChambre = this.reservation.getChambreReservee();
-            // Vérifier dispo pour les nouvelles dates
-            if (verifierDisponibilite(nouvelleChambre, nouvelleDateDebut, nouvelleDateFin)) {
-                // libérer les anciennes dates
-                LocalDate dateDebutAvant = this.reservation.getDateDebut();
-                LocalDate dateFinAvant = this.reservation.getDateFin();
-                for (LocalDate date = dateDebutAvant; !date.isAfter(dateFinAvant)
-                        || date.isEqual(dateFinAvant); date = date.plusDays(1)) {
-                    ancienneChambre.setDisponibilites(date, true);
+        // Vérifier dispo pour les nouvelles dates
+        if (verifierDisponibilite(nouvelleChambre, nouvelleDateDebut, nouvelleDateFin) ||
+                nouvelleDateDebut.isEqual(this.reservation.getDateDebut()) ||
+                        nouvelleDateFin.isEqual(this.reservation.getDateFin())) {
+            // libérer les anciennes dates
+            LocalDate dateDebutAvant = this.reservation.getDateDebut();
+            LocalDate dateFinAvant = this.reservation.getDateFin();
+            for (LocalDate date = dateDebutAvant; !date.isAfter(dateFinAvant)
+                    || date.isEqual(dateFinAvant); date = date.plusDays(1)) {
+                // s'il change de chambre il faut libérer l'ancienne
+                if (nouvelleChambre.getNumero() != this.reservation.getChambreReservee().getNumero()) {
+                    this.reservation.getChambreReservee().setDisponibilites(date, true);
+                } else {
+                    nouvelleChambre.setDisponibilites(date, true);
                 }
-                this.reservation.setChambreReservee(nouvelleChambre);
-                // Maj avec nouvelles dates
-                this.reservation.setDateDebut(nouvelleDateDebut);
-                this.reservation.setDateFin(nouvelleDateFin);
 
-                // Maj de la dispo pour les nuits pour la nouvelle réservation
-                for (LocalDate date = nouvelleDateDebut; !date.isAfter(nouvelleDateFin); date = date.plusDays(1)) {
-                    nouvelleChambre.setDisponibilites(date, false);
-                }
-                System.out.println("Réservation modifiée avec succès.");
-            } else {
-                throw new ChambreNonDisponible("Chambre non disponible pour les nouvelles dates choisies.");
             }
+            this.reservation.setChambreReservee(nouvelleChambre);
+            // Maj avec nouvelles dates
+            this.reservation.setDateDebut(nouvelleDateDebut);
+            this.reservation.setDateFin(nouvelleDateFin);
+            this.reservation.setNbNuits((int) ChronoUnit.DAYS.between(nouvelleDateDebut, nouvelleDateFin) + 1);
+
+            // Maj de la dispo pour les nuits pour la nouvelle réservation
+            for (LocalDate date = nouvelleDateDebut; !date.isAfter(nouvelleDateFin); date = date.plusDays(1)) {
+                nouvelleChambre.setDisponibilites(date, false);
+            }
+            System.out.println("Réservation modifiée avec succès.");
+        } else {
+            throw new ChambreNonDisponible("Chambre non disponible pour les nouvelles dates choisies.");
         }
     }
 

@@ -50,7 +50,7 @@ public class Chambre {
     }
 
     public String toString() {
-        return "Chambre " + this.numeroChambre + " (lit" + this.typeLit + ", " + this.prixNuit + "€ par nuit)\n" +
+        return "Chambre " + this.numeroChambre + " (lit " + this.typeLit + ", " + this.prixNuit + "€ par nuit)\n" +
                 "Etat : " + (this.estAttribuee ? "attribuée" : "libre") + "\n" +
                 "Nombre de douches : " + this.nbDouches + "\n";
     }

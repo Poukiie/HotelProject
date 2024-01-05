@@ -79,20 +79,19 @@ public class HotelApp implements Serializable {
                         System.out.println("1. Modifier la réservation");
                         System.out.println("2. Annuler la réservation");
                         System.out.println("3. Supprimer la réservation");
+                        System.out.print("> ");
                         String choixGestion = scan.nextLine();
 
                         switch (choixGestion) {
                             case "1":
-//                                if (clientChoisi.getReservation() != null) {
-//                                    Chambre chambreModification = reservationModification.getChambreReservee();
                                 LocalDate dateDebutModification = null;
                                 LocalDate dateFinModification = null;
 
                                 System.out.println("Réservation actuelle :");
                                 System.out.println(clientChoisi.getReservation());
 
-                                System.out.println("Entrez la nouvelle chambre :");
                                 afficherChambres(chambres);
+                                System.out.println("Entrez le numéro de la nouvelle chambre :");
                                 Chambre nouvelleChambre = choisirChambre(chambres, scan);
                                 while (nouvelleChambre == null) {
                                     System.out.println("Chambre introuvable. Veuillez réessayer.");
@@ -100,10 +99,12 @@ public class HotelApp implements Serializable {
                                 }
 
                                 System.out.println("Entrez la nouvelle date de début de la réservation (format jj/MM/yyyy) :");
+                                System.out.print("> ");
                                 String nouvelleDebut = scan.nextLine();
                                 dateDebutModification = parseDate(dateDebutModification, nouvelleDebut, scan);
 
                                 System.out.println("Entrez la nouvelle date de fin de la réservation (format jj/MM/yyyy) :");
+                                System.out.print("> ");
                                 String nouvelleFin = scan.nextLine();
                                 dateFinModification = parseDate(dateFinModification, nouvelleFin, scan);
                                 while (dateDebutModification.isAfter(dateFinModification)) {
@@ -118,9 +119,6 @@ public class HotelApp implements Serializable {
                                 } catch (ChambreNonDisponible e) {
                                     System.out.println(e.getMessage());
                                 }
-//                                } else {
-//                                    System.out.println("Ce client n'a pas de réservation à modifier.");
-//                                }
                                 break;
                             case "2": // annuler : état annulé + trace dans le fichier avant de la supprimer
                                 clientChoisi.annulerReservation();

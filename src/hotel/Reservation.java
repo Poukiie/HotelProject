@@ -54,6 +54,10 @@ public class Reservation {
         this.chambreReservee = chambreReservee;
     }
 
+    public void setNbNuits(int nbNuits) {
+        this.nbNuits = nbNuits;
+    }
+
     public int calculerNbNuits(LocalDate dateDebut, LocalDate dateFin) {
         return(int) ChronoUnit.DAYS.between(dateDebut, dateFin) + 1;
     }

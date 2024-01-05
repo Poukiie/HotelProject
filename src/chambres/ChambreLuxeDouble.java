@@ -25,7 +25,7 @@ public class ChambreLuxeDouble extends Chambre {
     }
 
     public String toString() {
-        return "Chambre " + getNumero() + " (lit" + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
+        return "Chambre " + getNumero() + " (lit " + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
                 "Etat : " + (getEstAttribuee() ? "attribuée" : "libre") + "\n" +
                 "Nombre de douches : " + getNbDouches() + "\n" +
                 "Baignoire spa : oui\n" +
