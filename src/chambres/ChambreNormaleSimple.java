@@ -10,14 +10,6 @@ public class ChambreNormaleSimple extends Chambre {
         this.wifiGratuit = true;
     }
 
-    public boolean getBalcon() {
-        return balcon;
-    }
-
-    public boolean getWifiGratuit() {
-        return wifiGratuit;
-    }
-
     public String toString() {
         return "Chambre " + getNumero() + " (lit " + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
                 "Etat : " + (getEstAttribuee() ? "attribuée" : "libre") + "\n" +

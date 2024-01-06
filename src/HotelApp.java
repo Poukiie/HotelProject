@@ -145,27 +145,12 @@ public class HotelApp implements Serializable {
                                 reservationsAnnulees.add(clientChoisi.getReservation());
 
                                 try {
-                                    FileInputStream file = new FileInputStream("donneesHotel.ser");
-                                    ObjectInputStream ois = new ObjectInputStream(file);
                                     FileOutputStream fileOutput = new FileOutputStream("donneesHotel.ser");
                                     ObjectOutputStream oos = new ObjectOutputStream(fileOutput);
 
-                                    // Charger la liste actuelle des réservations depuis le fichier à condition qu'elle existe
-                                    if (ois.available() > 0) {
-                                        LinkedList<Reservation> reservations = (LinkedList<Reservation>) ois.readObject();
-                                        reservations.add(clientChoisi.getReservation());
-
-                                        // Écrire la liste mise à jour dans le fichier
-                                        oos.writeObject(reservations);
-                                    }
-                                    else {
-                                        reservationsAnnulees.add(clientChoisi.getReservation());
-                                        oos.writeObject(reservationsAnnulees);
-                                    }
-
-                                    ois.close();
+                                    oos.writeObject(reservationsAnnulees);
                                     oos.close();
-                                } catch (IOException | ClassNotFoundException e) {
+                                } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }
 
@@ -244,7 +229,7 @@ public class HotelApp implements Serializable {
                         Facture facture = new Facture(clientChoisi);
                         factures.add(facture);
                         System.out.println(facture);
-                        clientChoisi.payerFacture(); // il part
+                        clientChoisi.supprimerReservation(); // il part
                         break;
                     }
                     else {

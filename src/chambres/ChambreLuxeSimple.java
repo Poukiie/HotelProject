@@ -12,18 +12,6 @@ public class ChambreLuxeSimple extends Chambre {
         this.serviceRepas = true;
     }
 
-    public boolean getBaignoireSpa() {
-        return baignoireSpa;
-    }
-
-    public boolean getEquipementHautGamme() {
-        return equipementHautGamme;
-    }
-
-    public boolean getServiceRepas() {
-        return serviceRepas;
-    }
-
     public String toString() {
         return "Chambre " + getNumero() + " (lit " + getTypeLit() + ", " + getPrixNuit() + "€ par nuit)\n" +
                 "Etat : " + (getEstAttribuee() ? "attribuée" : "libre") + "\n" +

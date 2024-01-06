@@ -12,10 +12,6 @@ public class CommandeRepas implements Serializable {
         this.sommeCommande = 0;
     }
 
-    public LinkedList<Plat> getPlats() {
-        return plats;
-    }
-
     public double getSommeCommande() {
         return sommeCommande;
     }

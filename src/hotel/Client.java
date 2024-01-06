@@ -33,10 +33,6 @@ public class Client implements Serializable {
         return reservation;
     }
 
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
-    }
-
     public void reserver(Chambre chambre, LocalDate dateDebut, LocalDate dateFin)
             throws ChambreNonDisponible {
         if (verifierDisponibilite(chambre, dateDebut, dateFin)) {
@@ -77,9 +73,11 @@ public class Client implements Serializable {
         if (verifierDisponibilite(nouvelleChambre, nouvelleDateDebut, nouvelleDateFin) ||
                 nouvelleDateDebut.isEqual(this.reservation.getDateDebut()) ||
                         nouvelleDateFin.isEqual(this.reservation.getDateFin())) {
+
             // libérer les anciennes dates
             LocalDate dateDebutAvant = this.reservation.getDateDebut();
             LocalDate dateFinAvant = this.reservation.getDateFin();
+
             for (LocalDate date = dateDebutAvant; !date.isAfter(dateFinAvant)
                     || date.isEqual(dateFinAvant); date = date.plusDays(1)) {
                 // s'il change de chambre il faut libérer l'ancienne
@@ -88,8 +86,8 @@ public class Client implements Serializable {
                 } else {
                     nouvelleChambre.setDisponibilites(date, true);
                 }
-
             }
+
             this.reservation.setChambreReservee(nouvelleChambre);
             // Maj avec nouvelles dates
             this.reservation.setDateDebut(nouvelleDateDebut);
@@ -100,6 +98,7 @@ public class Client implements Serializable {
             for (LocalDate date = nouvelleDateDebut; !date.isAfter(nouvelleDateFin); date = date.plusDays(1)) {
                 nouvelleChambre.setDisponibilites(date, false);
             }
+
             System.out.println("Réservation modifiée avec succès.");
         } else {
             throw new ChambreNonDisponible("Chambre non disponible pour les nouvelles dates choisies.");
@@ -136,12 +135,6 @@ public class Client implements Serializable {
 
         this.commandes.add(commandeRepas);
         System.out.println("Commande de repas passée avec succès pour le client " + this.nom);
-    }
-
-    public void payerFacture() {
-        this.reservation.getChambreReservee().setEstAttribuee(false);
-        this.reservation.getChambreReservee().getDisponibilites().clear();
-        supprimerReservation();
     }
 
     public String toString() {

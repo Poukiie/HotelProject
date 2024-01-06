@@ -4,7 +4,6 @@ import chambres.Chambre;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 public class Reservation implements Serializable {
     private LocalDate dateDebut;
@@ -58,9 +57,5 @@ public class Reservation implements Serializable {
 
     public void setNbNuits(int nbNuits) {
         this.nbNuits = nbNuits;
-    }
-
-    public int calculerNbNuits(LocalDate dateDebut, LocalDate dateFin) {
-        return(int) ChronoUnit.DAYS.between(dateDebut, dateFin) + 1;
     }
 }
