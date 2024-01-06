@@ -320,24 +320,6 @@ public class HotelApp implements Serializable {
         return plats;
     }
 
-    private static Client trouverClientParNom(LinkedList<Client> clients, String nomClient) {
-        for (Client client : clients) {
-            if (client.getNom().equalsIgnoreCase(nomClient)) {
-                return client;
-            }
-        }
-        return null;
-    }
-
-    private static Plat trouverPlatParNom(LinkedList<Plat> plats, String nomPlat) {
-        for (Plat plat : plats) {
-            if (plat.getNomPlat().equalsIgnoreCase(nomPlat)) {
-                return plat;
-            }
-        }
-        return null;
-    }
-
     private static LocalDate parseDate(LocalDate date, String dateToParse, Scanner scan) {
         try {
             date = LocalDate.parse(dateToParse, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -388,6 +370,33 @@ public class HotelApp implements Serializable {
         }
     }
 
+    private static Client trouverClientParNom(LinkedList<Client> clients, String nomClient) {
+        for (Client client : clients) {
+            if (client.getNom().equalsIgnoreCase(nomClient)) {
+                return client;
+            }
+        }
+        return null;
+    }
+
+    private static Plat trouverPlatParNom(LinkedList<Plat> plats, String nomPlat) {
+        for (Plat plat : plats) {
+            if (plat.getNomPlat().equalsIgnoreCase(nomPlat)) {
+                return plat;
+            }
+        }
+        return null;
+    }
+
+    private static Chambre trouverChambreParNumero(LinkedList<Chambre> chambres, String numeroChambre) {
+        for (Chambre chambre : chambres) {
+            if (String.valueOf(chambre.getNumero()).equals(numeroChambre)) {
+                return chambre;
+            }
+        }
+        return null;
+    }
+
     private static void afficherClients(LinkedList<Client> clients) {
         for (Client client : clients) {
             System.out.println(client.getNom());
@@ -423,15 +432,6 @@ public class HotelApp implements Serializable {
         System.out.print("> ");
         String platChoisi = scan.nextLine();
         return trouverPlatParNom(plats, platChoisi);
-    }
-
-    private static Chambre trouverChambreParNumero(LinkedList<Chambre> chambres, String numeroChambre) {
-        for (Chambre chambre : chambres) {
-            if (String.valueOf(chambre.getNumero()).equals(numeroChambre)) {
-                return chambre;
-            }
-        }
-        return null;
     }
 
     private static void afficherMenu() {
