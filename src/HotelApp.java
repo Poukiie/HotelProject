@@ -15,6 +15,9 @@ import java.util.Scanner;
 
 
 public class HotelApp implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         LinkedList<Chambre> chambres;
@@ -243,7 +246,7 @@ public class HotelApp implements Serializable {
                         clientChoisi = choisirClient(clients, scan);
                     }
                     if (clientChoisi.getReservation() != null) {
-                        Facture facture = new Facture(clientChoisi);
+                        Facture facture = new Facture(clientChoisi, clientChoisi.getCommandesPassees());
                         factures.add(facture);
                         System.out.println(facture);
                         clientChoisi.supprimerReservation(); // il part

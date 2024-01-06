@@ -12,7 +12,7 @@ import java.util.LinkedList;
 
 public class Client implements Serializable {
     private final String nom;
-    private final LinkedList<CommandeRepas> commandes;
+    private LinkedList<CommandeRepas> commandes;
     private Reservation reservation;
 
     public Client(String nom, Reservation reservation) {
@@ -36,7 +36,7 @@ public class Client implements Serializable {
     public void reserver(Chambre chambre, LocalDate dateDebut, LocalDate dateFin)
             throws ChambreNonDisponible {
         if (verifierDisponibilite(chambre, dateDebut, dateFin)) {
-            // ex: du 15 au 17 = 3 nuits (cette fonction exclus la date de fin)
+            // ex: du 15 au 17 = 3 nuits (cette fonction exclut la date de fin)
             int nbNuits = (int) ChronoUnit.DAYS.between(dateDebut, dateFin) + 1;
             this.reservation = new Reservation(dateDebut, dateFin, nbNuits, chambre);
             chambre.setEstAttribuee(true);
@@ -69,7 +69,7 @@ public class Client implements Serializable {
     }
     public void modifierReservation(LocalDate nouvelleDateDebut, LocalDate nouvelleDateFin, Chambre nouvelleChambre)
             throws ChambreNonDisponible {
-        // Vérifier dispo pour les nouvelles dates
+        // Vérifier dispo pour les nouvelles dates ou vérifier que les dates ne changent pas
         if (verifierDisponibilite(nouvelleChambre, nouvelleDateDebut, nouvelleDateFin) ||
                 nouvelleDateDebut.isEqual(this.reservation.getDateDebut()) ||
                         nouvelleDateFin.isEqual(this.reservation.getDateFin())) {
@@ -135,6 +135,13 @@ public class Client implements Serializable {
 
         this.commandes.add(commandeRepas);
         System.out.println("Commande de repas passée avec succès pour le client " + this.nom);
+    }
+
+    // Récupérer les commandes passées et vider la liste
+    public LinkedList<CommandeRepas> getCommandesPassees() {
+        LinkedList<CommandeRepas> commandesPassees = new LinkedList<>(this.commandes);
+        this.commandes = new LinkedList<>();
+        return commandesPassees;
     }
 
     public String toString() {
