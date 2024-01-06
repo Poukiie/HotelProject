@@ -46,7 +46,7 @@ public class HotelApp implements Serializable {
         afficherMenu();
         String choice = "";
 
-        while (!choice.equals("10")) {
+        while (!choice.equals("11")) {
             System.out.print("> ");
             choice = scan.nextLine();
             switch (choice) {
@@ -211,14 +211,31 @@ public class HotelApp implements Serializable {
                         System.out.println("Le client n'a aucune commande passée.");
                     }
                     break;
+                // Afficher les réservations annulées
                 case "8":
                     System.out.println("Liste des réservations annulées :");
-                    for (Reservation reservation : reservationsAnnulees) {
-                        System.out.println(reservation);
+                    if (reservationsAnnulees.isEmpty()) {
+                        System.out.println("Aucune réservation annulée.");
+                    } else {
+                        for (Reservation reservation : reservationsAnnulees) {
+                            System.out.println(reservation);
+                        }
+                    }
+                    break;
+                // Afficher les factures
+                case "9":
+                    System.out.println("Liste des factures :");
+                    if (factures.isEmpty()) {
+                        System.out.println("Aucune facture enregistrée.");
+                    }
+                    else {
+                        for (Facture facture : factures) {
+                            System.out.println(facture);
+                        }
                     }
                     break;
                 // Enregistrer la facture d'un client
-                case "9":
+                case "10":
                     System.out.println("Pour quel client souhaitez-vous enregistrer la facture ?");
                     clientChoisi = choisirClient(clients, scan);
                     while (clientChoisi == null) {
@@ -236,7 +253,7 @@ public class HotelApp implements Serializable {
                         System.out.println("Le client n'a pas de réservation.");
                         break;
                     }
-                case "10":
+                case "11":
                     System.out.println("Au revoir !");
                     // Sauvegarder les données
                     serialiser(clients, chambres, plats, factures, reservationsAnnulees);
@@ -415,7 +432,7 @@ public class HotelApp implements Serializable {
     }
 
     private static void afficherMenu() {
-        System.out.println("Que voulez-vous faire ? (tapez le numéro de votre choix)");
+        System.out.println("\nQue voulez-vous faire ? (tapez le numéro de votre choix)");
         System.out.println("1. Afficher les chambres");
         System.out.println("2. Afficher les chambres disponibles");
         System.out.println("3. Afficher les clients");
@@ -424,8 +441,9 @@ public class HotelApp implements Serializable {
         System.out.println("6. Commander un repas");
         System.out.println("7. Afficher les commandes d'un client");
         System.out.println("8. Afficher les réservations annulées");
-        System.out.println("9. Enregistrer la facture d'un client");
-        System.out.println("10. Quitter l'application");
+        System.out.println("9. Afficher les factures");
+        System.out.println("10. Enregistrer la facture d'un client");
+        System.out.println("11. Quitter l'application");
     }
 
     private static void serialiser(LinkedList<Client> clients, LinkedList<Chambre> chambres,
