@@ -71,8 +71,8 @@ public class Client implements Serializable {
             throws ChambreNonDisponible {
         // Vérifier dispo pour les nouvelles dates ou vérifier que les dates ne changent pas
         if (verifierDisponibilite(nouvelleChambre, nouvelleDateDebut, nouvelleDateFin) ||
-                nouvelleDateDebut.isEqual(this.reservation.getDateDebut()) ||
-                        nouvelleDateFin.isEqual(this.reservation.getDateFin())) {
+                (nouvelleDateDebut.isEqual(this.reservation.getDateDebut()) ||
+                        nouvelleDateFin.isEqual(this.reservation.getDateFin()))) {
 
             // libérer les anciennes dates
             LocalDate dateDebutAvant = this.reservation.getDateDebut();
@@ -83,12 +83,17 @@ public class Client implements Serializable {
                 // s'il change de chambre il faut libérer l'ancienne
                 if (nouvelleChambre.getNumero() != this.reservation.getChambreReservee().getNumero()) {
                     this.reservation.getChambreReservee().setDisponibilites(date, true);
+                    // si personne d'autre n'a réservé la chambre, la rendre disponible
+                    if (this.reservation.getChambreReservee().getDisponibilites().values().stream().allMatch(b -> b)) {
+                        this.reservation.getChambreReservee().setEstAttribuee(false);
+                    }
                 } else {
                     nouvelleChambre.setDisponibilites(date, true);
                 }
             }
 
             this.reservation.setChambreReservee(nouvelleChambre);
+            this.reservation.getChambreReservee().setEstAttribuee(true);
             // Maj avec nouvelles dates
             this.reservation.setDateDebut(nouvelleDateDebut);
             this.reservation.setDateFin(nouvelleDateFin);
