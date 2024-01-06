@@ -1,8 +1,9 @@
 package commande;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class CommandeRepas {
+public class CommandeRepas implements Serializable {
     private final LinkedList<Plat> plats;
     private double sommeCommande;
 

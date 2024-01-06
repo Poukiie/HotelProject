@@ -1,10 +1,12 @@
 package hotel;
 
 import chambres.Chambre;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-public class Reservation {
+public class Reservation implements Serializable {
     private LocalDate dateDebut;
     private LocalDate dateFin;
     private int nbNuits;

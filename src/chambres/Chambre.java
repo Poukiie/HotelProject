@@ -1,10 +1,11 @@
 package chambres;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Chambre {
+public class Chambre implements Serializable {
     private final int numeroChambre;
     private final String typeLit;
     private final double prixNuit;

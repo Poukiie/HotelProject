@@ -5,11 +5,12 @@ import commande.CommandeRepas;
 import commande.Plat;
 import exception.ChambreNonDisponible;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 
-public class Client {
+public class Client implements Serializable {
     private final String nom;
     private final LinkedList<CommandeRepas> commandes;
     private Reservation reservation;
@@ -119,9 +120,10 @@ public class Client {
             this.reservation.getChambreReservee().setDisponibilites(date, true);
         }
         // si personne d'autre n'a réservé la chambre, la rendre disponible
-        if (this.reservation.getChambreReservee().getDisponibilites().isEmpty()) {
+        if (this.reservation.getChambreReservee().getDisponibilites().values().stream().allMatch(b -> b)) {
             this.reservation.getChambreReservee().setEstAttribuee(false);
         }
+        this.commandes.clear();
         this.reservation = null;
     }
 
@@ -140,7 +142,6 @@ public class Client {
         this.reservation.getChambreReservee().setEstAttribuee(false);
         this.reservation.getChambreReservee().getDisponibilites().clear();
         supprimerReservation();
-        this.commandes.clear();
     }
 
     public String toString() {

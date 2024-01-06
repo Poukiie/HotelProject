@@ -2,7 +2,9 @@ package hotel;
 
 import commande.CommandeRepas;
 
-public class Facture {
+import java.io.Serializable;
+
+public class Facture implements Serializable {
     private final Client client;
     private final String sommeTotale;
 

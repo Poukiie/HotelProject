@@ -4,9 +4,9 @@ import exception.ChambreNonDisponible;
 import hotel.Client;
 import commande.Plat;
 import hotel.Facture;
+import hotel.Reservation;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -17,16 +17,36 @@ import java.util.Scanner;
 public class HotelApp implements Serializable {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-        LinkedList<Chambre> chambres = createChambres();
-        LinkedList<Client> clients = createClients();
-        LinkedList<Plat> plats = createPlats();
-        File file = new File("donneesHotel.ser");
+        LinkedList<Chambre> chambres;
+        LinkedList<Client> clients;
+        LinkedList<Plat> plats;
+        LinkedList<Facture> factures;
+        LinkedList<Reservation> reservationsAnnulees;
+
+        try {
+            FileInputStream file = new FileInputStream("donneesHotel.ser");
+            ObjectInputStream ois = new ObjectInputStream(file);
+
+            clients = (LinkedList<Client>) ois.readObject();
+            chambres = (LinkedList<Chambre>) ois.readObject();
+            plats = (LinkedList<Plat>) ois.readObject();
+            factures = (LinkedList<Facture>) ois.readObject();
+            reservationsAnnulees = (LinkedList<Reservation>) ois.readObject();
+            ois.close();
+        } catch (IOException | ClassNotFoundException e) {
+            // En cas d'erreur, initialiser les listes normalement
+            clients = createClients();
+            chambres = createChambres();
+            plats = createPlats();
+            factures = new LinkedList<>();
+            reservationsAnnulees = new LinkedList<>();
+        }
 
         System.out.println("Bienvenue à l'hôtel Goethe.");
         afficherMenu();
         String choice = "";
 
-        while (!choice.equals("9")) {
+        while (!choice.equals("10")) {
             System.out.print("> ");
             choice = scan.nextLine();
             switch (choice) {
@@ -63,7 +83,7 @@ public class HotelApp implements Serializable {
                         clientChoisi = choisirClient(clients, scan);
                     }
 
-                    Chambre chambreReservee = verifierChambreReservation(clientChoisi, chambres, scan);
+                    Chambre chambreReservee = verifierChambreReservation(chambres, scan);
                     creerReservation(clientChoisi, chambreReservee, scan);
                     break;
                 // Gérer une réservation
@@ -122,12 +142,33 @@ public class HotelApp implements Serializable {
                                 break;
                             case "2": // annuler : état annulé + trace dans le fichier avant de la supprimer
                                 clientChoisi.annulerReservation();
-                                // TODO : Ecrire la réservation dans le fichier (infos + annulée)
-                                try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(file.toPath()))) {
-                                    oos.writeObject(clientChoisi.getReservation());
-                                } catch (IOException e) {
+                                reservationsAnnulees.add(clientChoisi.getReservation());
+
+                                try {
+                                    FileInputStream file = new FileInputStream("donneesHotel.ser");
+                                    ObjectInputStream ois = new ObjectInputStream(file);
+                                    FileOutputStream fileOutput = new FileOutputStream("donneesHotel.ser");
+                                    ObjectOutputStream oos = new ObjectOutputStream(fileOutput);
+
+                                    // Charger la liste actuelle des réservations depuis le fichier à condition qu'elle existe
+                                    if (ois.available() > 0) {
+                                        LinkedList<Reservation> reservations = (LinkedList<Reservation>) ois.readObject();
+                                        reservations.add(clientChoisi.getReservation());
+
+                                        // Écrire la liste mise à jour dans le fichier
+                                        oos.writeObject(reservations);
+                                    }
+                                    else {
+                                        reservationsAnnulees.add(clientChoisi.getReservation());
+                                        oos.writeObject(reservationsAnnulees);
+                                    }
+
+                                    ois.close();
+                                    oos.close();
+                                } catch (IOException | ClassNotFoundException e) {
                                     throw new RuntimeException(e);
                                 }
+
                                 clientChoisi.supprimerReservation();
                                 System.out.println("Réservation annulée avec succès.");
                                 break;
@@ -144,11 +185,13 @@ public class HotelApp implements Serializable {
                 case "6":
                     System.out.println("Sélectionnez le client qui souhaite commander un repas :");
                     clientChoisi = choisirClient(clients, scan);
-                    Plat platChoisi = null;
+                    Plat platChoisi;
+
                     while (clientChoisi == null) {
                         System.out.println("Client introuvable. Veuillez réessayer.");
                         clientChoisi = choisirClient(clients, scan);
                     }
+
                     System.out.println("Liste des plats disponibles :");
                     afficherPlatsDisponibles(plats);
                     System.out.println("Quel plat souhaitez-vous commander ?");
@@ -158,9 +201,11 @@ public class HotelApp implements Serializable {
                         System.out.println("Plat introuvable. Veuillez réessayer.");
                         platChoisi = choisirPlat(plats, scan);
                     }
+
                     System.out.println("Quantité : ");
-                    System.out.println("> ");
+                    System.out.print("> ");
                     int quantitePlat = scan.nextInt();
+                    scan.nextLine();
                     clientChoisi.commanderRepas(platChoisi, quantitePlat);
                     break;
                 // Afficher les commandes d'un client
@@ -181,21 +226,35 @@ public class HotelApp implements Serializable {
                         System.out.println("Le client n'a aucune commande passée.");
                     }
                     break;
-                // Enregistrer la facture d'un client
                 case "8":
+                    System.out.println("Liste des réservations annulées :");
+                    for (Reservation reservation : reservationsAnnulees) {
+                        System.out.println(reservation);
+                    }
+                    break;
+                // Enregistrer la facture d'un client
+                case "9":
                     System.out.println("Pour quel client souhaitez-vous enregistrer la facture ?");
                     clientChoisi = choisirClient(clients, scan);
                     while (clientChoisi == null) {
                         System.out.println("Client introuvable. Veuillez réessayer.");
                         clientChoisi = choisirClient(clients, scan);
                     }
-                    Facture facture = new Facture(clientChoisi);
-                    System.out.println(facture);
-                    clientChoisi.payerFacture(); // il part
-                    break;
-                case "9":
+                    if (clientChoisi.getReservation() != null) {
+                        Facture facture = new Facture(clientChoisi);
+                        factures.add(facture);
+                        System.out.println(facture);
+                        clientChoisi.payerFacture(); // il part
+                        break;
+                    }
+                    else {
+                        System.out.println("Le client n'a pas de réservation.");
+                        break;
+                    }
+                case "10":
                     System.out.println("Au revoir !");
-                    // TODO: Sauvegarder les données
+                    // Sauvegarder les données
+                    serialiser(clients, chambres, plats, factures, reservationsAnnulees);
                     return;
                 default:
                     System.out.println("Commande inconnue, veuillez réessayer.");
@@ -243,12 +302,16 @@ public class HotelApp implements Serializable {
 
     private static LinkedList<Plat> createPlats() {
         LinkedList<Plat> plats = new LinkedList<>();
-        Plat plat1 = new Plat("Pizza", 12.5);
-        Plat plat2 = new Plat("Burger", 10.5);
-        Plat plat3 = new Plat("Salade", 6.5);
+        Plat plat1 = new Plat("Pizza", 10.0);
+        Plat plat2 = new Plat("Burger", 8.5);
+        Plat plat3 = new Plat("Salade", 3.5);
+        Plat plat4 = new Plat("Fraisier", 5.5);
+        Plat plat5 = new Plat("Café + croissant", 4.0);
         plats.add(plat1);
         plats.add(plat2);
         plats.add(plat3);
+        plats.add(plat4);
+        plats.add(plat5);
         return plats;
     }
 
@@ -273,19 +336,18 @@ public class HotelApp implements Serializable {
     private static LocalDate parseDate(LocalDate date, String dateToParse, Scanner scan) {
         try {
             date = LocalDate.parse(dateToParse, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            // TODO : Quand on retape la date, c'est nullpointerexception
         } catch (DateTimeParseException e) {
             System.out.println("Format de date invalide. Veuillez réessayer.");
-            System.out.println("> ");
+            System.out.print("> ");
             dateToParse = scan.nextLine();
             date = parseDate(date, dateToParse, scan);
         }
         return date;
     }
 
-    private static Chambre verifierChambreReservation(Client clientChoisi, LinkedList<Chambre> chambres, Scanner scan) {
-        System.out.println("Quelle chambre souhaitez-vous réserver ?");
+    private static Chambre verifierChambreReservation(LinkedList<Chambre> chambres, Scanner scan) {
         afficherChambres(chambres);
+        System.out.println("Quelle chambre souhaitez-vous réserver ?");
         Chambre chambreReservee = choisirChambre(chambres, scan);
 
         while (chambreReservee == null) {
@@ -376,8 +438,26 @@ public class HotelApp implements Serializable {
         System.out.println("5. Gérer une réservation"); // modifier, annuler et supprimer une réservation
         System.out.println("6. Commander un repas");
         System.out.println("7. Afficher les commandes d'un client");
-        System.out.println("8. Enregistrer la facture d'un client");
-        System.out.println("9. Quitter l'application");
+        System.out.println("8. Afficher les réservations annulées");
+        System.out.println("9. Enregistrer la facture d'un client");
+        System.out.println("10. Quitter l'application");
+    }
+
+    private static void serialiser(LinkedList<Client> clients, LinkedList<Chambre> chambres,
+                                           LinkedList<Plat> plats, LinkedList<Facture> factures,
+                                           LinkedList<Reservation> reservationsAnnulees) {
+        try {
+            FileOutputStream file = new FileOutputStream("donneesHotel.ser");
+            ObjectOutputStream oos = new ObjectOutputStream(file);
+            oos.writeObject(clients);
+            oos.writeObject(chambres);
+            oos.writeObject(plats);
+            oos.writeObject(factures);
+            oos.writeObject(reservationsAnnulees);
+            oos.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

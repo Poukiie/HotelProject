@@ -1,6 +1,8 @@
 package commande;
 
-public class Plat {
+import java.io.Serializable;
+
+public class Plat implements Serializable {
     private final String nomPlat;
     private final double prix;
 
